@@ -5,7 +5,6 @@
   "dependencies": {
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
-    "react-scripts": "1.0.17",
     "axios": "^0.17.1",
     "antd": "^3.0.3",
     "react-router": "^4.2.0",
@@ -15,14 +14,15 @@
     "redux-saga": "^0.16.0",
     "redux-devtools-extension": "^2.13.2",
     "styled-components": "^2.1.2",
-    "json-server": "^0.12.1",
     "history": "^4.7.2",
     "query-string": "^5.0.1",
     "prop-types": "^15.6.0",
-    "recharts": "^1.0.0-beta.9"
+    "reselect": "^3.0.1"
   },
   "devDependencies": {
-    "@storybook/react": "^3.3.15",
+    "@storybook/react": "^4.0.0-alpha.3",
+    "@storybook/addon-actions": "^4.0.0-alpha.3",
+    "@storybook/addon-links": "^4.0.0-alpha.4",
     "babel-core": "^6.26.0",
     "babel-eslint": "^7.2.3",
     "babel-jest": "22.1.0",
@@ -41,18 +41,34 @@
     "react-scripts": "^1.0.10",
     "react-test-renderer": "^16.2.0",
     "jsdoc": "^3.5.5",
-    "docdash": "^0.4.0"
+    "docdash": "^0.4.0",
+    "webpack": "^4.6.0",
+    "webpack-dev-server": "^3.1.3",
+    "webpack-cli": "^2.0.15",
+    "babel-loader": "^7.1.4",
+    "babel-preset-latest": "^6.24.1",
+    "babel-register": "^6.11.6",
+    "css-loader": "^0.28.11",
+    "babel-preset-es2017": "^6.24.1",
+    "babel-cli": "^6.26.0",
+    "babel-preset-stage-2": "^6.24.1",
+    "babel-polyfill": "^6.26.0",
+    "react-hot-loader": "next",
+    "babel-preset-react-hmre": "^1.1.1",
+    "babel-preset-env": "^1.6.1",
+    "extract-text-webpack-plugin": "^4.0.0-beta.0",
+    "compression-webpack-plugin": "^1.1.11",
+    "mini-css-extract-plugin": "^0.4.0",
+    "optimize-css-assets-webpack-plugin": "^4.0.1",
+    "uglifyjs-webpack-plugin": "^1.2.5",
+    "webpack-monitor": "^1.0.14",
+    "webpack-bundle-analyzer": "^2.11.2"
   },
   "scripts": {
-    "start-search": "cp src/search/index.js src/index.js && react-scripts start",
-    "start-dbform": "cp src/dbform/index.js src/index.js && react-scripts start",
-    "start-predictor": "cp src/predictor/index.js src/index.js && react-scripts start",
+    "start": "webpack-dev-server --config ./webpack.config.js --mode development --hot",
     "tests": "jest",
-    "start-json-server": "json-server --watch db.json --port 3001",
+    "build": "webpack --mode production",
     "storybook": "start-storybook -p 9001 -c .storybook",
-    "generate-docs": "jsdoc src/* -c jsdoc.json",
-    "build": "react-scripts build",
-    "build:clean": "mv build/static/js/*.js ../MWUI/static/js/predictor.js && mv build/static/css/*.css ../MWUI/static/css/predictor.css && rm -r build/static",
-    "eject": "react-scripts eject"
+    "generate-docs": "jsdoc src/* -c jsdoc.json"
   }
 }

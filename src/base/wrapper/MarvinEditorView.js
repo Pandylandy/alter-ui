@@ -14,7 +14,7 @@ const mergeProps = (stateProps, dispatchProps) => {
     ...stateProps,
     ...dispatchProps,
     onCancel: () => dispatch(modalAction(false)),
-    onOk: () => dispatch({ type: modal.typeAction, id: modal.id }),
+    onOk: () => dispatch({ type: modal.typeAction, structure: modal.structure }),
   };
 };
 

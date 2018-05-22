@@ -1,97 +1,157 @@
 import { takeEvery, put, call } from 'redux-saga/effects';
-import { addStructureIndex, addStructuresValidate, editStructureIndex, addAllAdditives, addAllModels } from './actions';
-import { startRequest, succsessRequest, errorRequest, modal } from '../../base/actions';
-import Request from '../../base/requests';
+import {
+  addStructureIndex,
+  addStructuresValidate,
+  editStructureIndex,
+  addStructuresResult,
+  editStructureValidate,
+} from './actions';
+import {
+  modal,
+  addModels,
+  addAdditives,
+  addMagic,
+} from '../../base/actions';
+import * as Request from '../../base/requests';
 import history from '../../base/history';
-import { URLS, MODAL } from '../../config';
+import { URLS } from '../../config';
 import { getUrlParams, stringifyUrl } from '../../base/parseUrl';
-import { repeatedRequests } from '../../base/sagas';
-import Serialize from '../../base/magic';
-import { message } from 'antd';
-import { convertCmlToBase64, clearEditor, exportCml, convertCmlToBase64Arr } from '../../base/marvinAPI';
+import { repeatedRequests, requestSaga, catchErrSaga, requestSagaContinius } from '../../base/sagas';
+import {
+  convertCmlToBase64,
+  clearEditor,
+  exportCml,
+  importCml,
+  convertCmlToBase64Arr,
+} from '../../base/marvinAPI';
+import {
+  SAGA_EDIT_STRUCTURE_INDEX,
+  SAGA_NEW_STRUCTURE,
+  SAGA_CREATE_TASK_INDEX,
+  SAGA_INIT_VALIDATE_PAGE,
+  SAGA_CREATE_RESULT_TASK,
+  SAGA_INIT_RESULT_PAGE,
+  SAGA_NEW_STRUCTURE_CALLBACK,
+  SAGA_EDIT_STRUCTURE_VALIDATE,
+  SAGA_DELETE_STRUCRURES_VALIDATE_PAGE,
+  SAGA_EDIT_STRUCTURE_VALIDATE_CALLBACK,
+  SAGA_EDIT_STRUCTURE_INDEX_CALLBACK,
+  SAGA_REVALIDATE_VALIDATE_PAGE,
+} from './constants';
 
-import 'antd/lib/message/style/css';
+// Index Page
 
-function* drawStructure() {
-  try {
-    yield call(clearEditor);
-    yield put(modal(true, MODAL.CREATE_TASK));
-  } catch (e) {
-    yield call(message.error, e.message);
-  }
+function* createNewStructure() {
+  yield call(clearEditor);
+  yield put(modal(true, SAGA_NEW_STRUCTURE_CALLBACK));
 }
 
-function* createStructure() {
-  try {
-    const cml = yield call(exportCml);
-    yield put(modal(false));
-    const base64 = yield call(convertCmlToBase64, cml);
-    yield put(addStructureIndex({ data: cml, base64 }));
-  } catch (e) {
-    yield call(message.error, e.message);
-  }
+function* createNewStructureCallback() {
+  const data = yield call(exportCml);
+  yield put(modal(false));
+  const base64 = yield call(convertCmlToBase64, data);
+  yield put(addStructureIndex({ data, base64 }));
 }
 
-function* editStructureForModal(action) {
-  try {
-    const cml = yield call(exportCml);
-    yield put(modal(false));
-    const base64 = yield call(convertCmlToBase64, cml);
-    yield put(editStructureIndex({ id: action.id, data: cml, base64 }));
-  } catch (e) {
-    yield call(message.error, e.message);
-  }
+function* editSelectStructure({ data, structure }) {
+  yield call(importCml, data);
+  yield put(modal(true, SAGA_EDIT_STRUCTURE_INDEX_CALLBACK, structure));
 }
 
-function* createTaskIndex(action) {
-  try {
-    yield put(startRequest());
-    const response = yield call(Request.createModellingTask, action.structure);
-    yield put(succsessRequest());
-    yield call(history.push, stringifyUrl(URLS.VALIDATE, { task: response.data.task }));
-  } catch (e) {
-    yield put(errorRequest(e.message, action));
-  }
+function* editSelectStructureCallback({ structure }) {
+  const data = yield call(exportCml);
+  yield put(modal(false));
+  const base64 = yield call(convertCmlToBase64, data);
+  yield put(editStructureIndex(structure, { data, base64 }));
 }
 
-function* validateTask(action) {
-  try {
-    yield put(startRequest());
-    const urlParams = yield getUrlParams();
-    const task = yield call(repeatedRequests, Request.getSearchTask, urlParams.task);
-    const models = yield call(Request.getModels);
-    const additives = yield call(Request.getAdditives);
-    const magic = yield call(Request.getMagic);
-    const structureOfTypes = Serialize.models(task.data, models.data, magic.data);
-    const structureAndBase64 = yield call(convertCmlToBase64Arr, task.data.structures);
-    yield put(addStructuresValidate(structureAndBase64.map(s => ({ ...s, check: false }))));
-    yield put(addAllAdditives(additives.data));
-    yield put(addAllModels(models.data));
-    yield put(succsessRequest());
-  } catch (e) {
-    yield put(errorRequest(e.message, action));
-  }
+function* createTaskIndex({ structures }) {
+  const response = yield call(Request.createModellingTask, structures);
+  yield call(history.push, stringifyUrl(URLS.VALIDATE, { task: response.data.task }));
 }
 
-function* createResultTask(action) {
-  try {
-    yield put(startRequest());
+// Revalidating
 
-    yield put(succsessRequest());
-  } catch (e) {
-    yield put(errorRequest(e.message, action));
-  }
+function* revalidate() {
+  const urlParams = yield getUrlParams();
+  const task = yield call(repeatedRequests, Request.getSearchTask, urlParams.task);
+  const structureAndBase64 = yield call(convertCmlToBase64Arr, task.data.structures);
+  yield put(addStructuresValidate({ data: structureAndBase64, type: task.data.type }));
+}
+
+// ------------
+
+// Validate Page
+function* initValidatePage() {
+  const urlParams = yield getUrlParams();
+  const models = yield call(Request.getModels);
+  const additives = yield call(Request.getAdditives);
+  const magic = yield call(Request.getMagic);
+  const task = yield call(repeatedRequests, Request.getSearchTask, urlParams.task);
+  const structureAndBase64 = yield call(convertCmlToBase64Arr, task.data.structures);
+  yield put(addStructuresValidate({ data: structureAndBase64, type: task.data.type }));
+  yield put(addAdditives(additives.data));
+  yield put(addModels(models.data));
+  yield put(addMagic(magic.data));
+}
+
+function* editStructureModalValidate({ data, structure }) {
+  yield call(importCml, data);
+  yield put(modal(true, SAGA_EDIT_STRUCTURE_VALIDATE_CALLBACK, structure));
+}
+
+function* editStructureModalValidateCallback({ structure }) {
+  const data = yield call(exportCml);
+  yield put(modal(false));
+  const base64 = yield call(convertCmlToBase64, data);
+  yield put(editStructureValidate({ data, base64, structure }));
+}
+
+function* deleteStructures({ structuresId }) {
+  const urlParams = yield getUrlParams();
+  const structuresToDelete = structuresId.map(structure => ({ structure, todelete: true }));
+  const response = yield call(Request.deleteStructure, urlParams.task, structuresToDelete);
+  yield call(history.push, stringifyUrl(URLS.VALIDATE, { task: response.data.task }));
+  yield call(catchErrSaga, revalidate);
+}
+
+function* createResultTask({ data }) {
+  const urlParams = yield getUrlParams();
+  const response = yield call(Request.createResultTask, data, urlParams.task);
+  yield call(history.push, stringifyUrl(URLS.RESULT, { task: response.data.task }));
+}
+
+function* revalidateValidatePage({ data }) {
+  const urlParams = yield getUrlParams();
+  const response = yield call(Request.revalidateStructure, urlParams.task, data);
+  yield call(history.push, stringifyUrl(URLS.VALIDATE, { task: response.data.task }));
+  yield call(catchErrSaga, revalidate);
+}
+
+// Result page
+function* resultPageInit() {
+  const urlParams = yield getUrlParams();
+  const responce = yield call(repeatedRequests, Request.getResultTask, urlParams.task);
+  const results = yield call(convertCmlToBase64Arr, responce.data.structures);
+  yield put(addStructuresResult(results));
 }
 
 export function* sagas() {
-  // yield takeEvery('CREATE_TASK', createTask);
-  yield takeEvery('INIT_VALIDATE_PAGE', validateTask);
-  yield takeEvery('CREATE_RESULT_TASK', createResultTask);
-  // yield takeEvery('INIT_RESULT_PAGE', resultPage);
-  yield takeEvery('DRAW_STRUCTURE', drawStructure);
-  yield takeEvery('CREATE_TASK_SEARCH', createStructure);
-  yield takeEvery('EDIT_STRUCTURE_INDEX', editStructureForModal);
-  yield takeEvery('CREATE_TASK_INDEX', createTaskIndex);
-  // yield takeEvery('EDIT_TASK_SEARCH', editTaskStructure);
-  // yield takeEvery('REVALIDATE_TASK', revalidateTask);
+  // Index page
+  yield takeEvery(SAGA_NEW_STRUCTURE, catchErrSaga, createNewStructure);
+  yield takeEvery(SAGA_NEW_STRUCTURE_CALLBACK, catchErrSaga, createNewStructureCallback);
+  yield takeEvery(SAGA_EDIT_STRUCTURE_INDEX, catchErrSaga, editSelectStructure);
+  yield takeEvery(SAGA_EDIT_STRUCTURE_INDEX_CALLBACK, catchErrSaga, editSelectStructureCallback);
+  yield takeEvery(SAGA_CREATE_TASK_INDEX, requestSagaContinius, createTaskIndex);
+
+  // Validate Page
+  yield takeEvery(SAGA_INIT_VALIDATE_PAGE, requestSaga, initValidatePage);
+  yield takeEvery(SAGA_EDIT_STRUCTURE_VALIDATE, catchErrSaga, editStructureModalValidate);
+  yield takeEvery(SAGA_EDIT_STRUCTURE_VALIDATE_CALLBACK, catchErrSaga, editStructureModalValidateCallback);
+  yield takeEvery(SAGA_DELETE_STRUCRURES_VALIDATE_PAGE, requestSaga, deleteStructures);
+  yield takeEvery(SAGA_REVALIDATE_VALIDATE_PAGE, requestSaga, revalidateValidatePage);
+  yield takeEvery(SAGA_CREATE_RESULT_TASK, requestSagaContinius, createResultTask);
+
+  // Result Page
+  yield takeEvery(SAGA_INIT_RESULT_PAGE, requestSaga, resultPageInit);
 }

@@ -2,32 +2,35 @@ export const MARVIN_PATH_IFRAME = '/static/marvinjs/editorws.html';
 export const MARVIN_EDITOR_IS_EMPTY = '<cml><MDocument></MDocument></cml>';
 export const MARVIN_ID = '#marvinjs';
 
-const BASE_URL = process.env.NODE_ENV === 'production' ? 'http://cimm.kpfu.ru/' : 'http://localhost:3001/';
+const BASE_URL = process.env.NODE_ENV === 'production' ? 'https://cimm.kpfu.ru' : 'http://localhost:3000';
 
-export const API_URLS = {
-  CREATE_TASK_PREDICTOR: `${BASE_URL}api/task/create/0`,
-  CREATE_TASK_SEARCH: `${BASE_URL}api/task/create/1`,
-  CREATE_STRUCTURE: `${BASE_URL}structures`,
-  PREPARE_TASK: `${BASE_URL}api/task/prepare/`,
-  RESULT: `${BASE_URL}api/task/model/`,
-  ADDITIVES: `${BASE_URL}api/resources/additives`,
-  MODELS: `${BASE_URL}api/resources/models`,
-  UPLOAD_FILE: `${BASE_URL}api/task/upload`,
-  SAVE_TASK: `${BASE_URL}api/task/results/`,
-  USER_AUTH: `${BASE_URL}api/auth`,
-  MAGIC: `${BASE_URL}api/resources/magic`,
-  STRUCTURES: `${BASE_URL}structures`,
-  SETTINGS: `${BASE_URL}settings`,
-
-
+const API = {
+  CREATE_TASK_PREDICTOR: '/api/jobs/create/0',
+  CREATE_TASK_SEARCH: '/api/jobs/create/1',
+  CREATE_STRUCTUSE: '/structures',
+  PREPARE_TASK: '/api/jobs/prepare/',
+  RESULT: '/api/jobs/process/',
+  ADDITIVES: '/api/jobs/additives',
+  MODELS: '/api/jobs/resources/models',
+  UPLOAD_FILE: '/api/jobs/task/upload',
+  SAVE_TASK: '/api/jobs/task/results/',
+  USER_AUTH: '/api/jobs/auth',
+  MAGIC: '/api/jobs/magic',
+  RECORDS: '/api/db/db/:database/:table/records',
+  RECORDS_METADATA: '/api/jobs/:database/:table/records/:metadata',
+  CREATE_TASK_DBFORM: '/api/jobs/validate/:type',
+  SERVER_SIDE_SUBSCRIBE: '/api/jobs/subscribe/connect',
+  DB_FIELDS: '/api/db/db',
+  USERS: '/api/db/users',
+  WHOAMI: '/api/db/auth',
 };
 
-export const MODAL = {
+const MODAL = {
   CREATE_TASK: 'CREATE_TASK_SEARCH',
   EDIT_TASK: 'EDIT_TASK_SEARCH',
 };
 
-export const URLS = {
+const URLS = {
   INDEX: '/',
   VALIDATE: '/validate',
   RESULT: '/result/',
@@ -40,7 +43,21 @@ export const URLS = {
   SETTINGS: '/settings',
 };
 
-export const REPEATED_REQUESTS = {
+const REPEATED_REQUESTS = {
   TIMEOUT: 2000,
   RETRY: 5,
+};
+
+const API_URLS = Object.keys(API)
+  .reduce((acc, key) => {
+    acc[key] = BASE_URL + API[key];
+    return acc;
+  }, {});
+
+export {
+  API_URLS,
+  BASE_URL,
+  MODAL,
+  URLS,
+  REPEATED_REQUESTS,
 };

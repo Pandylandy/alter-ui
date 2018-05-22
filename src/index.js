@@ -1,8 +1,7 @@
 import ReactDOM from 'react-dom';
 /* eslint-disable */
-import App from './dbform/App';
-
+import App from './search/App';
 ReactDOM.render(
-  App,
-  document.getElementById('root'),
+    App,
+    document.getElementById('root'),
 );

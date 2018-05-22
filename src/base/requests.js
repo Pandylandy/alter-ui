@@ -1,60 +1,23 @@
 import axios from 'axios';
 import { API_URLS } from '../config';
 
-/**
- * Class of requests
- *
- */
-class Request {
-  /**
-   * Create search task
-   * @static
-   * @param {object} data format {data: string }
-   * @return {AxiosPromise<any>}
-   */
-  static createSearchTask(data) {
-    return axios.post(API_URLS.CREATE_TASK_SEARCH, data, { withCredentials: true });
-  }
 
-  /**
-   * Create modelling task
-   * @static
-   * @param data format {data: string }
-   * @return {AxiosPromise<any>}
-   */
-  static createModellingTask(data) {
-    return axios.post(API_URLS.CREATE_TASK_PREDICTOR, data, { withCredentials: true });
-  }
+export const createSearchTask = data => axios.post(API_URLS.CREATE_TASK_SEARCH, data);
 
-  /**
-   * Get data after created search task
-   * @static
-   * @param {string} task - id of task
-   * @return {AxiosPromise<any>}
-   */
-  static getSearchTask(task) {
-    return axios.get(API_URLS.PREPARE_TASK + task, { withCredentials: true });
-  }
+export const createModellingTask = data => axios.post(API_URLS.CREATE_TASK_PREDICTOR, data);
 
-  static getModels() {
-    return axios.get(API_URLS.MODELS, { withCredentials: true });
-  }
+export const getSearchTask = task => axios.get(API_URLS.PREPARE_TASK + task);
 
-  static getAdditives() {
-    return axios.get(API_URLS.ADDITIVES, { withCredentials: true });
-  }
+export const getModels = () => axios.get(API_URLS.MODELS);
 
-  static getMagic() {
-    return axios.get(API_URLS.MAGIC, { withCredentials: true });
-  }
+export const getAdditives = () => axios.get(API_URLS.ADDITIVES);
 
-  static createResultTask(cml, task) {
-    return axios.post(API_URLS.RESULT + task, cml, { withCredentials: true });
-  }
+export const getMagic = () => axios.get(API_URLS.MAGIC);
 
-  static getResultTask(task) {
-    return axios.get(API_URLS.RESULT + task, { withCredentials: true });
-  }
-}
+export const createResultTask = (cml, task) => axios.post(API_URLS.RESULT + task, cml);
 
-export default Request;
+export const getResultTask = task => axios.get(API_URLS.RESULT + task);
+
+export const deleteStructure = (task, structure) => axios.post(API_URLS.PREPARE_TASK + task, structure);
+
+export const revalidateStructure = (task, structure) => axios.post(API_URLS.PREPARE_TASK + task, structure);

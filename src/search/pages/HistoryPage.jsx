@@ -50,7 +50,7 @@ const HistoryPage = ({ histories, showResults, showValidate }) => (<div>
             </Tooltip>
           </Rigth>
           <img src={hist.base64} />
-          <div><b>Selected model:</b> { hist.models.filter(m => m.model === hist.selectModel)[0].name }</div>
+          <div><b>Selected model:</b> { hist.models.filter(m => m.model === hist.selectModel.model)[0].name }</div>
         </div>
       </div>))}
   </div>

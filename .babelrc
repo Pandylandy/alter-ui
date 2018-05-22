@@ -1,0 +1,11 @@
+{
+  "presets": [
+    "env",
+    "react",
+    "es2017",
+    "stage-2",
+    "react-hmre",
+    "babel-preset-env",
+    "babel-preset-react"
+  ]
+}

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { API_URLS } from '../../config';
+import { urlConverter } from '../../base/functions';
 
 
 const Structures = {
@@ -11,10 +12,17 @@ const Structures = {
 
 const Settings = {
   getAll: () => axios.get(API_URLS.SETTINGS),
+  getDBFields: () => axios.get(API_URLS.DB_FIELDS),
+};
+
+const Users = {
+  getUsers: () => axios.get(API_URLS.USERS),
+  whoAmI: () => axios.get(API_URLS.WHOAMI),
 };
 
 const Records = {
-  getAllbyUser: (database, table) => axios.get(API_URLS.RECORDS, { database, table }),
+  getRecords: (database, table, full, user, page) =>
+    axios.get(urlConverter(API_URLS.RECORDS, { database, table }, { full, user, page })),
 };
 
-export { Structures, Settings, Records };
+export { Structures, Settings, Records, Users };

@@ -5,3 +5,9 @@ export const REQUEST = {
 };
 
 export const TRIGGER = 'TRIGGER';
+
+export const BASE_DATA = {
+  ADD_ALL_ADDITIVES: 'ADD_ALL_ADDITIVES',
+  ADD_ALL_MODELS: 'ADD_ALL_MODELS',
+  ADD_MAGIC: 'ADD_MAGIC',
+};

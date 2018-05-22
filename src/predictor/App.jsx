@@ -6,7 +6,7 @@ import history from '../base/history';
 import {
   IndexPage,
   ValidatePage,
-  ResultPage } from './containers';
+  ResultPage } from './components';
 import { NotFoundPage } from '../components';
 import { URLS } from '../config';
 import Main from './Layout';

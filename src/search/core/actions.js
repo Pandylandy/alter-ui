@@ -4,8 +4,8 @@ export const addStructure = arr => ({
   type: STRUCTURE.ADD_STRUCTURE, arr,
 });
 
-export const editStructure = (cml, base64) => ({
-  type: STRUCTURE.EDIT_STRUCTURE, cml, base64,
+export const editStructure = obj => ({
+  type: STRUCTURE.EDIT_STRUCTURE, obj,
 });
 
 export const addSelectModel = model => ({

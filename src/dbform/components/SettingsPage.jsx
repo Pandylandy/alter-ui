@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { Form, Select, Slider, Switch } from 'antd';
 import { addSettings } from '../core/actions';
 import sliderConfig from '../../components/formItemConfigs';
+import { currentGrid } from '../../base/functions';
 
 const FormItem = Form.Item;
 const { Option } = Select;
@@ -12,11 +13,14 @@ const itemsConfig = {
   tabSize: ['large', 'default', 'small'],
 };
 
+const currentGrigForWindow = currentGrid();
+
 const SettingsPage = ({ setSettings, settings }) => {
   const handleChange = (value, key, parent = null) => {
     if (parent) settings[parent][key] = value;
     else settings[key] = value;
-
+    const serialObj = JSON.stringify(settings);
+    localStorage.setItem('settings', serialObj);
     setSettings(settings);
   };
   const formItemLayout = {
@@ -29,6 +33,8 @@ const SettingsPage = ({ setSettings, settings }) => {
       sm: { span: 12 },
     },
   };
+
+
   return (
     <Form>
       <h4>Tabs:</h4>
@@ -37,10 +43,10 @@ const SettingsPage = ({ setSettings, settings }) => {
         label="Position"
       >
         <Select
-          value={settings && settings.tabs.tabPosition}
+          value={settings.tabs.tabPosition}
           onChange={val => handleChange(val, 'tabPosition', 'tabs')}
         >
-          { itemsConfig.tabPosition.map((item, i) => <Option key={item + i} value={item} >{item}</Option>) }
+          { itemsConfig.tabPosition.map((item, i) => <Option key={i.toString()} value={item} >{item}</Option>) }
         </Select>
       </FormItem>
       <FormItem
@@ -48,29 +54,27 @@ const SettingsPage = ({ setSettings, settings }) => {
         label="Size"
       >
         <Select
-          value={settings && settings.tabs.size}
+          value={settings.tabs.size}
           onChange={val => handleChange(val, 'size', 'tabs')}
         >
-          { itemsConfig.tabSize.map((item, i) => <Option key={item + i} value={item} >{item}</Option>) }
+          { itemsConfig.tabSize.map((item, i) =>
+            <Option key={i.toString()} value={item} >{item}</Option>,
+          )}
         </Select>
       </FormItem>
       <h4>Structure list page grid:</h4>
+      <FormItem
+        {...formItemLayout}
+        label={currentGrigForWindow}
+      >
 
-      {Object.keys(settings.grid).map(
-        key =>
-          (<FormItem
-            {...formItemLayout}
-            label={key}
-          >
+        <Slider
+          {...sliderConfig.grid}
+          value={settings.grid[currentGrigForWindow]}
+          onChange={val => handleChange(val, currentGrigForWindow, 'grid')}
+        />
 
-            <Slider
-              {...sliderConfig.grid}
-              value={settings && settings.grid[key]}
-              onChange={val => handleChange(val, key, 'grid')}
-            />
-
-          </FormItem>),
-      )}
+      </FormItem>
       <h4>Create page conditions:</h4>
       {Object.keys(settings.condition).map(
         key =>
@@ -80,20 +84,34 @@ const SettingsPage = ({ setSettings, settings }) => {
           >
             <Slider
               {...sliderConfig[key]}
-              value={settings && settings.condition[key]}
+              value={settings.condition[key]}
               onChange={val => handleChange(val, key, 'condition')}
             />
           </FormItem>),
       )}
+      <h4>List page display method</h4>
+
+      <FormItem
+        {...formItemLayout}
+        label="full"
+      >
+
+        <Switch
+          value={!!settings.full}
+          onChange={(val) => {
+            val ? handleChange(1, 'full') : handleChange(0, 'full');
+          }}
+        />
+      </FormItem>
       <h4>Auto reset after submit in create page</h4>
 
       <FormItem
-          {...formItemLayout}
+        {...formItemLayout}
         label="Auto reset"
       >
 
         <Switch
-          value={settings && settings.auto_reset}
+          value={settings.auto_reset}
           onChange={val => handleChange(val, 'auto_reset')}
         />
       </FormItem>
