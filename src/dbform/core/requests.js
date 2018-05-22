@@ -21,8 +21,8 @@ const Users = {
 };
 
 const Records = {
-  getAllbyUser: (database, table, user) =>
-    axios.get(urlConverter(API_URLS.RECORDS, { database, table, user })),
+  getRecords: (database, table, full, user, page) =>
+    axios.get(urlConverter(API_URLS.RECORDS, { database, table }, { full, user, page })),
 };
 
 export { Structures, Settings, Records, Users };

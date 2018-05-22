@@ -2,7 +2,7 @@ import { takeEvery, call, put } from 'redux-saga/effects';
 import { message } from 'antd';
 import { Structures, Records, Settings, Users } from './requests';
 import { addStructures, deleteStructure, addStructure, editStructure, showModal, addDBFields, addUsers } from './actions';
-import { requestSaga } from '../../base/sagas';
+import { catchErrSaga, requestSaga, requestSagaContinius } from '../../base/sagas';
 import { convertCmlToBase64, convertCmlToBase64Arr } from '../../base/marvinAPI';
 import {
   SAGA_INIT_STRUCTURE_LIST_PAGE,
@@ -12,15 +12,31 @@ import {
   SAGA_GET_RECORDS,
 } from './constants';
 
-
-function* initStructureListPage() {
+function* initStructureListPage({ full }) {
   const fields = yield call(Settings.getDBFields);
-  const users = yield call(Users.getUsers);
+  let users = yield call(Users.getUsers);
   const me = yield call(Users.whoAmI);
-  yield put(addUsers(users.data.sort((a) => {
-    if (a.user === me.data.user) return true;
-  }).reverse()));
+
+  users = users.data.map((user) => {
+    if (user.user === me.data.user) {
+      return { ...user, user: 0 };
+    }
+    return user;
+  });
+  yield put(addUsers(users));
   yield put(addDBFields(fields.data));
+  yield call(requestSaga, getRecordsByUser, {
+    full,
+    user: 0,
+    page: 1,
+    database: fields.data[0],
+    table: 'molecule',
+  });
+}
+
+function* getRecordsByUser({ full, user, database, table, page }) {
+  const structures = yield call(Records.getRecords, database, table, full, user, page);
+  yield put(addStructures(structures.data));
 }
 
 function* getRecords(action) {
@@ -53,9 +69,9 @@ function* modalDiscard(action) {
 
 
 export function* sagas() {
-  yield takeEvery(SAGA_INIT_STRUCTURE_LIST_PAGE, requestSaga, initStructureListPage);
+  yield takeEvery(SAGA_INIT_STRUCTURE_LIST_PAGE, requestSagaContinius, initStructureListPage);
   yield takeEvery(SAGA_ADD_STRUCTURE, requestSaga, addNewStructure);
   yield takeEvery(SAGA_DELETE_STRUCTURE, requestSaga, deleteStructureInList);
   yield takeEvery(SAGA_EDIT_STRUCTURE, requestSaga, modalDiscard);
-  yield takeEvery(SAGA_GET_RECORDS, requestSaga, getRecords);
+  yield takeEvery(SAGA_GET_RECORDS, requestSaga, getRecordsByUser);
 }

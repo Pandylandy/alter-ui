@@ -56,8 +56,7 @@ class SlidersSelect extends Component {
   }
 
   triggeredChange(data) {
-    const { onChange } = this.props;
-    onChange(data);
+    this.props.onChange(data);
   }
 
   render() {
@@ -73,11 +72,22 @@ class SlidersSelect extends Component {
           onBlur={this.handleBlur}
           defaultValue={defaultValue && defaultValue.map(value => value.additive)}
         >
-          {data.map((item, i) => <Option key={item.additive + i} value={item.additive}>{item.name}</Option>)}
+          {data.map((item, i) =>
+            (<Option
+              key={item.additive + i}
+              value={item.additive}
+            >
+              {item.name}
+            </Option>),
+          )}
         </Select>
         { selected.map((item, i) => (
           <div>{ item.name }
-            <SliderInput key={i} value={item.amount} onChange={e => this.handleSlide(e, item)} />
+            <SliderInput
+              key={item.name + i}
+              value={item.amount}
+              onChange={e => this.handleSlide(e, item)}
+            />
           </div>
         ))}
       </div>
@@ -89,6 +99,7 @@ SlidersSelect.propTypes = {
   data: PropTypes.array,
   defaultValue: PropTypes.array,
   sumEqual: PropTypes.number,
+  onChange: PropTypes.func.isRequired,
 };
 
 SlidersSelect.defaultProps = {

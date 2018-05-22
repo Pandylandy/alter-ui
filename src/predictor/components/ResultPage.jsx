@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { BackTop, Row, Col, Tabs, Badge } from 'antd';
-import { ResultItem, ModalIncrease } from '../../components';
+import { BackTop, Row, Col, Tabs, Button } from 'antd';
+import { ModalIncrease } from '../../components';
+import { URLS } from '../../config';
 import {
   SAGA_INIT_RESULT_PAGE,
 } from '../core/constants';
@@ -32,10 +33,29 @@ class ResultPage extends Component {
   }
 
   render() {
-    const { results } = this.props;
+    const { results, history } = this.props;
 
     return results && (
       <div>
+        <Row style={{ paddingBottom: 38 }}>
+          <Col span={8}>
+            <Button
+              icon="left"
+              onClick={() => history.push(URLS.INDEX)}
+            >
+              Back
+            </Button>
+          </Col>
+          <Col span={8} offset={8} style={{ textAlign: 'right' }}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              icon="save"
+            >
+                Save
+            </Button>
+          </Col>
+        </Row>
 
         {results && results.map((result, key) =>
           (<Row>
@@ -52,7 +72,7 @@ class ResultPage extends Component {
                 <p>Pressure(atm): {result.pressure}</p>
                 <p>Additives:</p>
               </Conditions>
-              <Tabs defaultActiveKey={1}>
+              <Tabs defaultActiveKey={0}>
                 { result.models && result.models.map((model, idx) =>
                   (<TabPane tab={model.name} key={idx}>
                     { model.results.map((res, i) =>

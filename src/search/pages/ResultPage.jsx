@@ -5,6 +5,10 @@ import PropTypes from 'prop-types';
 import { Pagination, BackTop } from 'antd';
 import { ResultItem, ModalIncrease } from '../../components';
 import SearchInputView from './IndexPage';
+import {
+  SAGA_CREATE_TASK,
+  SAGA_INIT_RESULT_PAGE,
+} from '../core/constants';
 
 const Wrapper = styled.div`
     padding-bottom: 20px;
@@ -38,7 +42,11 @@ class ResultPage extends Component {
   }
 
   render() {
-    const { results, showIncreaseModel, onSearchImg } = this.props;
+    const {
+      results,
+      showIncreaseModel,
+      onSearchImg,
+    } = this.props;
 
     return results && (
       <div>
@@ -79,8 +87,8 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   showIncreaseModel: () => null,
-  onSearchImg: cml => dispatch({ type: 'CREATE_TASK', cml }),
-  initPage: () => dispatch({ type: 'INIT_RESULT_PAGE' }),
+  onSearchImg: data => dispatch({ type: SAGA_CREATE_TASK, data }),
+  initPage: () => dispatch({ type: SAGA_INIT_RESULT_PAGE }),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ResultPage);

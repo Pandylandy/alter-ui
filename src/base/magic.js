@@ -30,13 +30,11 @@ const modelsOfTypes = (structureType, models, magic, taskType) => {
    * @param models
    * @param magic
    */
-export const models = (task, models, magic) => task.structures.map((structure) => {
+export const models = (task, models, magic) => task.data.map((structure) => {
   const modelSorted = modelsOfTypes(structure.type, models, magic, task.type);
   return {
     ...structure,
-    cml: structure.data,
     models: modelSorted,
-    selectModel: modelSorted[0].model,
   };
 });
 
@@ -45,4 +43,9 @@ export const additives = (structures, additives, magic) => structures.map(struct
   solvents: additives.filter(additive => additive.type === magic.AdditiveType.SOLVENT),
   catalysts: additives.filter(additive => additive.type === magic.AdditiveType.CATALYST),
 }));
+
+export const additivesOfType = (additives, magic) => ({
+  solvents: additives.filter(additive => additive.type === magic.AdditiveType.SOLVENT),
+  catalysts: additives.filter(additive => additive.type === magic.AdditiveType.CATALYST),
+});
 

@@ -1,12 +1,9 @@
 import React from 'react';
-import { Form, Input, Icon, Button, Slider, Row, Col } from 'antd';
+import { Input, Icon, Button, Row, Col } from 'antd';
 import PropTypes from 'prop-types';
-import sliderConfig from './formItemConfigs';
-
-const FormItem = Form.Item;
 
 
-class DynamicFieldSet extends React.Component {
+class DynamicForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -36,10 +33,10 @@ class DynamicFieldSet extends React.Component {
 
   add() {
     const { form } = this.props;
+
+
     const keys = form.getFieldValue('keys');
-
     const newId = this.getMaxOfArray(keys.map(k => k.id)) + 1;
-
     const nextKeys = keys.concat({ id: newId, key: '', value: '' });
 
     form.setFieldsValue({
@@ -49,9 +46,13 @@ class DynamicFieldSet extends React.Component {
 
   render() {
     const { getFieldDecorator, getFieldValue } = this.props.form;
-    const { condition } = this.props;
+    const { description, formComponent } = this.props;
+
     getFieldDecorator('keys', { initialValue: [{ id: 0, key: '', value: '' }] });
+
     const keys = getFieldValue('keys');
+    const FormItem = formComponent.Item;
+
     const formItems = keys.map(k => (
       <FormItem
         required={false}
@@ -98,45 +99,22 @@ class DynamicFieldSet extends React.Component {
       </FormItem>
     ));
 
-    const cond = Object.keys(condition).map(
-      key =>
-        (<FormItem
-          label={key}
-          key={key}
-        >
-          {getFieldDecorator(`condition.${key}`, {
-            initialValue: condition[key],
-          })(
-            <Slider
-              {...sliderConfig[key]}
-            />,
-          )}
-        </FormItem>),
-    );
-
     return (
-      <Form>
-        {cond}
-        {formItems}
-        <FormItem>
-          <Button type="dashed" onClick={this.add} style={{ width: '100%' }}>
-            <Icon type="plus" /> Add field
-          </Button>
-        </FormItem>
-      </Form>
+      <FormItem>
+        <Button type="dashed" onClick={this.add} style={{ width: '100%' }}>
+          <Icon type="plus" /> Add field
+        </Button>
+      </FormItem>
     );
   }
 }
 
-DynamicFieldSet.propTypes = {
-  condition: PropTypes.object,
+DynamicForm.propTypes = {
+  description: PropTypes.object,
 };
 
-DynamicFieldSet.defaultProps = {
-  condition: {},
+DynamicForm.defaultProps = {
+  description: {},
 };
 
-
-const WrappedDynamicFieldSet = Form.create()(DynamicFieldSet);
-
-export default WrappedDynamicFieldSet;
+export default DynamicForm;

@@ -1,9 +1,17 @@
 import React from 'react';
-import { Form, Icon, Input, Button, message, Row, Col } from 'antd';
+import Form from 'antd/lib/form';
+import Icon from 'antd/lib/icon';
+import Input from 'antd/lib/input';
+import Button from 'antd/lib/button';
+import message from 'antd/lib/message';
+import Row from 'antd/lib/row';
+import Col from 'antd/lib/col';
+
 import axios from 'axios';
 import { MainLayout } from '../components';
 import { API_URLS } from '../config';
 import 'antd/dist/antd.css';
+import "moment/locale/ru"
 
 
 const FormItem = Form.Item;

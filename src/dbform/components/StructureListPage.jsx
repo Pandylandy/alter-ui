@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { Form, Row, Col, Button, Icon, List, Collapse, Card as BaseCard, Popconfirm, Pagination, Select } from 'antd';
 import styled from 'styled-components';
 import { showModal } from '../core/actions';
+import { getSettings, getUsers, getDatabase } from '../core/selectors';
 import { SAGA_DELETE_STRUCTURE, SAGA_GET_RECORDS, SAGA_INIT_STRUCTURE_LIST_PAGE } from '../core/constants';
 
 const Card = styled(BaseCard)`
@@ -21,10 +22,7 @@ class StructureListPage extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      current: 1,
-      pageSize: 10,
-      sorted: 'decrease',
-      expand: false,
+      expand: true,
     };
 
     this.toggle = this.toggle.bind(this);
@@ -33,7 +31,8 @@ class StructureListPage extends Component {
   }
 
   componentDidMount() {
-    console.log('!!');
+    const { settings: { full } } = this.props;
+    this.props.initPage(full);
   }
 
   onShowSizeChange(current, pageSize) {
@@ -50,10 +49,10 @@ class StructureListPage extends Component {
 
   handleSearch(e) {
     e.preventDefault();
-    const { form, getStructure } = this.props;
+    const { form, getStructure, settings: { full } } = this.props;
     form.validateFields((err, values) => {
-      const { sorting, database, table, user } = values;
-      getStructure(database, table, user);
+      const { database, table, user } = values;
+      getStructure({database, table, user, full, page:1});
     });
   }
 
@@ -67,11 +66,9 @@ class StructureListPage extends Component {
   }
 
   render() {
-    const { structures, editStructure, deleteStructure, settings, form: { getFieldDecorator } } = this.props;
-    const { current, pageSize, sorted, expand } = this.state;
+    const { structures, editStructure, deleteStructure, settings, form: { getFieldDecorator }, users, database } = this.props;
+    const { expand } = this.state;
 
-
-    const structuresSorted = structures.sort((a, b) => (sorted === 'increase' ? a.id - b.id : b.id - a.id));
     const gridSettings = settings && settings.grid;
 
     return structures && settings && (
@@ -81,57 +78,45 @@ class StructureListPage extends Component {
           onSubmit={this.handleSearch}
         >
           <Row gutter={24}>
-            <Col span={6} style={{ display: expand ? 'block' : 'none' }}>
+            <Col span={8} style={{ display: expand ? 'block' : 'none' }}>
               <FormItem label="Database">
                 {getFieldDecorator('database', {
-                  initialValue: settings.dbfields[0],
+                  initialValue: database && database[0],
                 })(
                   <Select placeholder="choose..">
-                    {settings.dbfields.map((field, i) =>
+                    {database && database.map((field, i) =>
                       <Option key={i} value={field}>{field}</Option>,
                     )}
                   </Select>,
                 )}
               </FormItem>
             </Col>
-            <Col span={6} style={{ display: expand ? 'block' : 'none' }}>
+            <Col span={8} style={{ display: expand ? 'block' : 'none' }}>
+              <FormItem label="Table">
+                {getFieldDecorator('table', {
+                  initialValue: 'molecule',
+                })(
+                  <Select>
+                    <Option key="0" value="molecule">molecule</Option>
+                    <Option key="1" value="reaction">reaction</Option>
+                  </Select>,
+                )}
+              </FormItem>
+            </Col>
+            <Col span={8} style={{ display: expand ? 'block' : 'none' }}>
               <FormItem label="User">
                 {getFieldDecorator('user', {
-                  initialValue: settings.usersList[0].user,
+                  initialValue: 0,
                 })(
                   <Select placeholder="choose..">
-                    {settings.usersList.map(user =>
+                    {users && users.map(user =>
                       <Option key={user.name} value={user.user}>{user.name}</Option>,
                     )}
                   </Select>,
                 )}
               </FormItem>
             </Col>
-            <Col span={6} style={{ display: expand ? 'block' : 'none' }}>
-              <FormItem label="Table">
-                {getFieldDecorator('table', {
-                  initialValue: settings.tableFields[1],
-                })(
-                  <Select placeholder="choose..">
-                    {settings.tableFields.map((field, i) =>
-                      <Option key={i} value={field}>{field}</Option>,
-                    )}
-                  </Select>,
-                )}
-              </FormItem>
-            </Col>
-            <Col span={6} style={{ display: expand ? 'block' : 'none' }}>
-              <FormItem label="Sorting">
-                {getFieldDecorator('sorting', {
-                  initialValue: 'increase',
-                })(
-                  <Select>
-                    <Option value="increase">increase</Option>
-                    <Option value="decrease">decrease</Option>
-                  </Select>,
-                )}
-              </FormItem>
-            </Col>
+
             <Col span={24} style={{ textAlign: 'right', display: expand ? 'block' : 'none' }}>
               <FormItem>
                 <Button type="primary" htmlType="submit">Search</Button>
@@ -152,14 +137,14 @@ class StructureListPage extends Component {
               showSizeChanger
               onChange={this.changePage}
               onShowSizeChange={this.onShowSizeChange}
-              defaultCurrent={current}
+              // defaultCurrent={}
               total={structures.length}
             />
           </Col>
         </Row>
         <List
           grid={{ ...gridSettings, gutter: 20 }}
-          dataSource={structuresSorted.slice((current * pageSize) - pageSize, current * pageSize)}
+          dataSource={structures}
           renderItem={item => (
             <List.Item
               key={item.id}
@@ -222,15 +207,17 @@ StructureListPage.propTypes = {
 
 
 const mapStateToProps = state => ({
-  structures: state.structures,
-  settings: state.settings,
+  settings: getSettings(state),
+  users: getUsers(state),
+  database: getDatabase(state),
+  structures: [],
 });
 
 const mapDispatchToProps = dispatch => ({
-  getStructure: (database, table, user) => dispatch({ type: SAGA_GET_RECORDS, database, table, user }),
+  getStructure: obj => dispatch({ type: SAGA_GET_RECORDS, ...obj }),
   editStructure: id => dispatch(showModal(true, id)),
   deleteStructure: id => dispatch({ type: SAGA_DELETE_STRUCTURE, id }),
-  initPage: () => dispatch({ type: SAGA_INIT_STRUCTURE_LIST_PAGE }),
+  initPage: full => dispatch({ type: SAGA_INIT_STRUCTURE_LIST_PAGE, full }),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Form.create()(StructureListPage));

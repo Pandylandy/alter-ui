@@ -1,6 +1,7 @@
 var webpack = require('webpack');
 var path = require('path');
 
+
 module.exports = {
   entry: {
     search: [
@@ -36,16 +37,16 @@ module.exports = {
         loader: "babel-loader"
       },
       {
-        test: /\.css$/,
-        use: [ 'style-loader', 'css-loader' ]
+        test: /\.css/,
+        use:  [  'style-loader', 'css-loader']
       }
     ]
   },
-  plugins: [
-    new webpack.HotModuleReplacementPlugin()
-  ],
   resolve: {
     extensions: ['*', '.js', '.jsx']
+  },
+  watchOptions: {
+    poll: true
   },
   devServer:{
     hot: true,
